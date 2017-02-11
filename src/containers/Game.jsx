@@ -113,25 +113,12 @@ export default class Game extends Component {
 		const {size:{player}, playerLifePoint, positions:{playerPosition:top}} = this.state;
 
 		console.log('touch', fpType)
-		let newLifePoint = playerLifePoint;
 		let newPlayerTop = fpTop - player + 1;
-		let newCollisonWith = fpKey;
+		let newLifePoint = playerLifePoint; 
 
-		if(fpType === NORMAL){
-			newLifePoint += 2;
-			if(newLifePoint > 20){
-				newLifePoint = 20;
-			}
-		}else if(fpType === SPRING){
-			newPlayerTop -= 100;
-			newCollisonWith = null;
-		}else if(fpType === SPIKES){
-			newLifePoint -= 4;
-			if(newLifePoint < 1){
-				//call game over
-			}
-		}
-		console.log(newLifePoint)
+		newLifePoint = this.updateLifePoint(fpType, newLifePoint);
+
+		// check if < 1 or gameover /////////////////////////////
 
 		this.setState({
 			...this.state,
@@ -142,9 +129,23 @@ export default class Game extends Component {
 					left: this.state.positions.player.left
 				}
 			},
-			collisionWith: newCollisonWith,
+			collisionWith: fpKey,
 			playerLifePoint: newLifePoint
 		})
+	}
+
+	updateLifePoint = (fpType, lifePoint) => {
+		
+		if(fpType === NORMAL){
+			lifePoint += 2;
+			if(lifePoint > 20){
+				lifePoint = 20;
+			}
+		}else if(fpType === SPIKES){
+			lifePoint -= 4;
+		}
+		
+		return lifePoint;
 	}
 
 	handlePlayerMovement = (dirObj) => {
@@ -191,7 +192,7 @@ export default class Game extends Component {
 		this.mainInterval = setInterval(()=>{
 			this.updatePlatformPositions();
 			this.updatePlayerPositions();
-		}, 50);
+		}, 60);
 		this.gameInterval = setInterval(this.updatePlatformsInPlay, 1000);
 	}
 
@@ -200,26 +201,34 @@ export default class Game extends Component {
 	}
 
 	updatePlayerPositions = () => {
-		const {platformSpeed, fallingSpeed, positions:{player}, collisionWith} = this.state;
-		// console.log('her');
-		let NewTop, NewLeft;
+		const {platformSpeed, fallingSpeed, positions:{player, platforms}, collisionWith} = this.state;
+	
+		let newTop, newLeft;
+		let newCollisionWith = collisionWith;
+		let currentPlatform = platforms.filter(fp => fp.key === collisionWith )[0];
 		
 		if(collisionWith !== null){
-			NewTop = player.top - platformSpeed;
+			newTop = player.top - platformSpeed;
+			if(currentPlatform.type === SPRING){
+				newTop -= 100;
+				newCollisionWith = null;
+			}
 		}else{
-			NewTop = player.top + fallingSpeed;
+			newTop = player.top + fallingSpeed;
 		}
 		
-		NewLeft = player.left;
+		newLeft = player.left;
 		
 		this.setState({
+			...this.state,
 			positions:{
 				...this.state.positions,
 				player:{
-					top: NewTop,
-					left: NewLeft
+					top: newTop,
+					left: newLeft
 				}
-			}
+			},
+			collisionWith: newCollisionWith
 		})
 	}
 
