@@ -1,15 +1,16 @@
 import React, { Component, PropTypes } from 'react';
 import { Stair } from 'components';
 
+
 class Platform extends Component {
 
 	componentDidUpdate() {
-		const {info: {key, top, left, type}, collisionWith, checkCollision} = this.props;
+		const {info: {key, top, left, type}, collisionWith, checkCollision, onCollide} = this.props;
 		
 		if(key !== collisionWith &&
-			this.props.checkCollision(key)){
+			checkCollision(key)){
 
-			this.props.onCollide(key, top, type)
+			onCollide(key, top, type);	
 		}
 
 	}

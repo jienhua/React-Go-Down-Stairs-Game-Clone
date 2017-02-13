@@ -2,9 +2,11 @@ import React, { Component } from 'react';
 import { Board, Player, Platform, GameStatus } from '../components';
 import { UP, DOWN, LEFT, RIGHT } from '../helpers/constants';
 import { randomGen } from '../helpers/utils';
-import { SPIKES, NORMAL, SPRING } from '../helpers/constants'; 
+import { SPIKES, NORMAL, SPRING, MOVERIGHT, MOVELEFT, FALLEN } from '../helpers/constants'; 
 
-const platformType = [SPIKES, NORMAL, SPRING];
+// const platformType = [SPIKES, NORMAL, SPRING, MOVERIGHT, MOVELEFT];
+const platformType = [ FALLEN ];
+
 
 const getDefaultState = ({ boardSize, playerSize}) => {
 	// const half = Math.floor(boardSize.width/2)
@@ -38,10 +40,10 @@ const getDefaultState = ({ boardSize, playerSize}) => {
 		fallingSpeed: 4,
 		playerScore: 0, // lv
 		playerLifePoint:20,
-		platformSpeed: 1,
+		platformSpeed: 5,
 		platformIndex: 0,
-		activePlatforms: 2
-
+		activePlatforms: 4,
+		// platformIndex: 1
 	} 
 }
 
@@ -52,8 +54,6 @@ export default class Game extends Component {
 		super(props);
 		const { boardSize, playerSize } = props;
 		this.state = getDefaultState({ boardSize, playerSize });
-		this.updatePlayerPositions   = this.updatePlayerPositions.bind(this);
-		this.updatePlatformPositions = this.updatePlatformPositions.bind(this);
 	}
 
 	placePlatfrom = () => {
@@ -109,16 +109,20 @@ export default class Game extends Component {
 		return newPlatfrom;
 	}
 
-	handlePlayerCollision = (fpKey, fpTop, fpType) => {
-		const {size:{player}, playerLifePoint, positions:{playerPosition:top}} = this.state;
+	handlePlayerCollision = (pfKey, pfTop, pfType) => {
+		const {platformSpeed, size:{player}, playerLifePoint, positions:{playerPosition:top}} = this.state;
 
-		console.log('touch', fpType)
-		let newPlayerTop = fpTop - player + 1;
+		console.log('touch', pfType)
+		let newPlayerTop = pfTop - player + platformSpeed;
 		let newLifePoint = playerLifePoint; 
 
-		newLifePoint = this.updateLifePoint(fpType, newLifePoint);
+		newLifePoint = this.updateLifePoint(pfType, newLifePoint);
 
 		// check if < 1 or gameover /////////////////////////////
+
+		if(pfType === FALLEN){
+			this.removePlatform(pfKey);
+		}
 
 		this.setState({
 			...this.state,
@@ -129,19 +133,19 @@ export default class Game extends Component {
 					left: this.state.positions.player.left
 				}
 			},
-			collisionWith: fpKey,
+			collisionWith: pfKey,
 			playerLifePoint: newLifePoint
 		})
 	}
 
-	updateLifePoint = (fpType, lifePoint) => {
+	updateLifePoint = (pfType, lifePoint) => {
 		
-		if(fpType === NORMAL){
+		if(pfType === NORMAL){
 			lifePoint += 2;
 			if(lifePoint > 20){
 				lifePoint = 20;
 			}
-		}else if(fpType === SPIKES){
+		}else if(pfType === SPIKES){
 			lifePoint -= 4;
 		}
 		
@@ -203,21 +207,37 @@ export default class Game extends Component {
 	updatePlayerPositions = () => {
 		const {platformSpeed, fallingSpeed, positions:{player, platforms}, collisionWith} = this.state;
 	
-		let newTop, newLeft;
-		let newCollisionWith = collisionWith;
-		let currentPlatform = platforms.filter(fp => fp.key === collisionWith )[0];
-		
+		let newTop, 
+			newLeft,
+			currentPlatform,
+			newCollisionWith;
+
+		newCollisionWith = collisionWith;
+		newLeft = player.left;
+
 		if(collisionWith !== null){
+
+			currentPlatform = platforms.filter(fp => fp.key === collisionWith )[0];
+			// console.log(currentPlatform.top)
+			// console.log(this.state.size.platform.height)
 			newTop = player.top - platformSpeed;
+			// newTop = currentPlatform.top - this.state.size.platform.height - platformSpeed;
+
 			if(currentPlatform.type === SPRING){
 				newTop -= 100;
+			}else if(currentPlatform.type === MOVERIGHT){
+				newLeft += 2;
+			}else if(currentPlatform.type === MOVELEFT){
+				newLeft -= 2;
+			}
+
+			if(!this.checkCollision(collisionWith)){
 				newCollisionWith = null;
 			}
 		}else{
 			newTop = player.top + fallingSpeed;
 		}
 		
-		newLeft = player.left;
 		
 		this.setState({
 			...this.state,
@@ -261,6 +281,23 @@ export default class Game extends Component {
 		}
 	}
 
+	removePlatform = (pfKey) => {
+
+		const { positions:{platforms}} = this.state;
+		const delay = 800; // 0.8 sec
+
+		setTimeout(function(){
+			this.setState({
+				...this.state,
+				positions:{
+					...this.state.positions,
+					platforms: platforms.filter(pf => pf.key !== pfKey)
+				},
+				collisionWith: null
+			})
+		}.bind(this), delay);
+
+	}
 
 	render(){	
 		const {

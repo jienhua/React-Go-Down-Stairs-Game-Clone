@@ -33,6 +33,8 @@ class InfoBoard extends Component{
 				<div style={pfListItemStyle('grey')}>NORMAL</div>
 				<div style={pfListItemStyle('green')}>SPRING</div>
 				<div style={pfListItemStyle('red')}>SPIKES</div>
+				<div style={pfListItemStyle('brown')}>MOVE RIGHT</div>
+				<div style={pfListItemStyle('brown')}>MOVE LEFT</div>
 			</div>
 		)
 	}

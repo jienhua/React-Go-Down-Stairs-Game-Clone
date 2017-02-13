@@ -1,5 +1,5 @@
 import React from 'react';
-import { NORMAL, SPIKES, SPRING } from '../helpers/constants';
+import { NORMAL, SPIKES, SPRING, MOVERIGHT, MOVELEFT, FALLEN } from '../helpers/constants';
 
 
 const style = ({size, position, type}) => {
@@ -16,6 +16,15 @@ const style = ({size, position, type}) => {
 		case SPIKES:
 			color = 'red';
 			break;
+		case MOVERIGHT:
+			color = 'brown';
+			break;
+		case MOVELEFT:
+			color = 'brown';
+			break;
+		case FALLEN:
+			color = 'black';
+			break;
 	}
 
     return {
@@ -29,4 +38,4 @@ const style = ({size, position, type}) => {
     };
 }
 
-export default (props) => <div style={style(props)}/>
+export default (props) => <div style={style(props)}>{props.type}</div>
