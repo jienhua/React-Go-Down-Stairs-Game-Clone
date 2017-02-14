@@ -16,12 +16,13 @@ class Platform extends Component {
 	}
 
 	render() {
-		const { size, info: { top, left, type }} = this.props;
+		const { size, info: { top, left, type, key}} = this.props;
 		return (
 			<Stair 
 				size={size}
 				position={{top, left}}
 				type={type}
+				index={key}
 			/>
 		)
 	}

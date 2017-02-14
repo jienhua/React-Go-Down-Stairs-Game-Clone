@@ -40,10 +40,9 @@ const getDefaultState = ({ boardSize, playerSize}) => {
 		fallingSpeed: 4,
 		playerScore: 0, // lv
 		playerLifePoint:20,
-		platformSpeed: 5,
+		platformSpeed: 3,
 		platformIndex: 0,
 		activePlatforms: 4,
-		// platformIndex: 1
 	} 
 }
 
@@ -59,12 +58,14 @@ export default class Game extends Component {
 	placePlatfrom = () => {
 		const { board, platform } = this.state.size;
 
-		const startPosition = randomGen(board.width-platform.width);
-
+		// const startPosition = randomGen(board.width-platform.width);
+		const startPosition = 150
 		const type = platformType[randomGen(platformType.length)]
 		
 		const newPlatform = this.generatePlatform(startPosition, type); 
-		// console.log(JSON.stringify(newPlatform))
+		console.log('----------------------')
+		console.log(JSON.stringify(this.state.positions.platforms))
+		console.log('NEW', JSON.stringify(newPlatform))
 
 		this.setState({
 			positions:{
@@ -112,7 +113,7 @@ export default class Game extends Component {
 	handlePlayerCollision = (pfKey, pfTop, pfType) => {
 		const {platformSpeed, size:{player}, playerLifePoint, positions:{playerPosition:top}} = this.state;
 
-		console.log('touch', pfType)
+		console.log('touch', pfType, pfKey)
 		let newPlayerTop = pfTop - player + platformSpeed;
 		let newLifePoint = playerLifePoint; 
 
@@ -121,7 +122,11 @@ export default class Game extends Component {
 		// check if < 1 or gameover /////////////////////////////
 
 		if(pfType === FALLEN){
-			this.removePlatform(pfKey);
+			let delay = 800 // 0.8 seconds
+			setTimeout(()=>{
+				this.removePlatform(pfKey);
+			}, delay)
+			
 		}
 
 		this.setState({
@@ -218,10 +223,7 @@ export default class Game extends Component {
 		if(collisionWith !== null){
 
 			currentPlatform = platforms.filter(fp => fp.key === collisionWith )[0];
-			// console.log(currentPlatform.top)
-			// console.log(this.state.size.platform.height)
 			newTop = player.top - platformSpeed;
-			// newTop = currentPlatform.top - this.state.size.platform.height - platformSpeed;
 
 			if(currentPlatform.type === SPRING){
 				newTop -= 100;
@@ -284,19 +286,15 @@ export default class Game extends Component {
 	removePlatform = (pfKey) => {
 
 		const { positions:{platforms}} = this.state;
-		const delay = 800; // 0.8 sec
 
-		setTimeout(function(){
-			this.setState({
+		this.setState({
 				...this.state,
 				positions:{
 					...this.state.positions,
 					platforms: platforms.filter(pf => pf.key !== pfKey)
 				},
 				collisionWith: null
-			})
-		}.bind(this), delay);
-
+		})
 	}
 
 	render(){	

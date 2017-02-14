@@ -23,7 +23,7 @@ const style = ({size, position, type}) => {
 			color = 'brown';
 			break;
 		case FALLEN:
-			color = 'black';
+			color = 'pink';
 			break;
 	}
 
@@ -38,4 +38,4 @@ const style = ({size, position, type}) => {
     };
 }
 
-export default (props) => <div style={style(props)}>{props.type}</div>
+export default (props) => <div style={style(props)}>{props.index}</div>
