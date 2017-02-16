@@ -8,22 +8,22 @@ const style = ({size, position, type}) => {
 
 	switch(type){
 		case NORMAL:
-			color = 'grey';
+			color = '#663300';
 			break;
 		case SPRING:
-			color = 'green';
+			color = '#b3ffa8';
 			break;
 		case SPIKES:
-			color = 'red';
+			color = '#fc9797';
 			break;
 		case MOVERIGHT:
-			color = 'brown';
+			color = '#a6a6a6';
 			break;
 		case MOVELEFT:
-			color = 'brown';
+			color = '#a6a6a6';
 			break;
 		case FALLEN:
-			color = 'pink';
+			color = '#e6ffff';
 			break;
 	}
 
@@ -38,4 +38,35 @@ const style = ({size, position, type}) => {
     };
 }
 
-export default (props) => <div style={style(props)}>{props.index}</div>
+const patten = ({type}) => {
+	let patten = '';
+
+	switch(type){
+		case NORMAL:
+			break;
+		case SPRING:
+			patten = (<spam>&#8803;&#8803;&#8803;&#8803;&#8803;&#8803;&#8803;</spam>);
+			break;
+		case SPIKES:
+			patten = (<spam>&Delta;&Delta;&Delta;&Delta;&Delta;&Delta;&Delta;&Delta;&Delta;</spam>);
+			break;
+		case MOVERIGHT:
+			patten = (<spam>&#8883;&#8883;&#8883;&#8883;&#8883;&#8883;&#8883;</spam>);
+			break;
+		case MOVELEFT:
+			patten = (<spam>&#8882;&#8882;&#8882;&#8882;&#8882;&#8882;&#8882;</spam>);
+			break;
+		case FALLEN:
+			patten = '(-_--__---_-_)';
+			break;
+	}
+
+	return patten;
+
+}
+
+export default (props) =>(
+	<div style={style(props)}>
+		<strong>{patten(props)}</strong>
+	</div>
+)

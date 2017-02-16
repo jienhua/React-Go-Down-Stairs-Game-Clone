@@ -5,3 +5,4 @@ export Platform from './Platform';
 export Stair from './Stair';
 export InfoBoard from './InfoBoard';
 export GameStatus from './GameStatus';
+export SpikyCeiling from './SpikyCeiling';

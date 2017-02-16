@@ -12,12 +12,14 @@ class Player extends Component {
 				newDirection = { top: 0, left: -10, dir: LEFT};
 				break;
 			// case 38:
+			// 	// move top, should disable
 			// 	newDirection = { top: -10, left: 0, dir: UP};
 			// 	break;
 			case 39:
 				newDirection = { top: 0, left: 10, dir: RIGHT};
 				break;
 			// case 40:
+			// 	// move bottom, should disable
 			// 	newDirection = { top: 10, left: 0, dir: DOWN};
 			// 	break;
 			default:
@@ -37,7 +39,7 @@ class Player extends Component {
 				<Avatar 
 					position={{top, left}}
 					size={size}
-					color='orange'
+					color='#fffde0'
 				/>
 			</div>
 		)

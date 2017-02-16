@@ -22,7 +22,6 @@ class Platform extends Component {
 				size={size}
 				position={{top, left}}
 				type={type}
-				index={key}
 			/>
 		)
 	}

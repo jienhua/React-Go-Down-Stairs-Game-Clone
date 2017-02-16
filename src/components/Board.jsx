@@ -1,8 +1,8 @@
 import React from 'react';
 // import {Grid, Col, Row} from 'react-bootstrap'
-import {InfoBoard} from 'components';
+import {InfoBoard, SpikyCeiling} from 'components';
 
-const boardStyle = (height, width) =>{
+const boardStyle = (height, width, isEnd) =>{
 
 	return {
 		width: width+'px',
@@ -12,20 +12,25 @@ const boardStyle = (height, width) =>{
 		// margin: '25px',
 		// marginRight: 'auto',
 		overflow: 'hidden',
-		float:'left'
+		float:'left',
+		opacity: isEnd? 0.5 : 1,
+		backgroundColor: isEnd? "black" : "white"
 	};
 };
 
-const style = () =>{
+const style = (isEnd) =>{
+
 	return {
-		margin:'25px 20%'
+		margin:'25px 20%',
 	}
 }
 
-export default ({boardSize, children}) => (
+export default ({boardSize, isEnd, children}) => (
 	
 	<div style={style()}>
-		<div style={boardStyle(boardSize.height, boardSize.width)}>
+		<div style={boardStyle(boardSize.height, boardSize.width, isEnd)}>
+			<SpikyCeiling/>
+			{isEnd}
 			{children}
 		</div>
 		<InfoBoard width={boardSize.width} />

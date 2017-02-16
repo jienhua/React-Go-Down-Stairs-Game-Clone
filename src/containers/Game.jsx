@@ -2,10 +2,10 @@ import React, { Component } from 'react';
 import { Board, Player, Platform, GameStatus } from '../components';
 import { UP, DOWN, LEFT, RIGHT } from '../helpers/constants';
 import { randomGen } from '../helpers/utils';
-import { SPIKES, NORMAL, SPRING, MOVERIGHT, MOVELEFT, FALLEN } from '../helpers/constants'; 
+import { SPIKES, NORMAL, SPRING, MOVERIGHT, MOVELEFT, FALLEN, TOP, BOTTOM } from '../helpers/constants'; 
 
-// const platformType = [SPIKES, NORMAL, SPRING, MOVERIGHT, MOVELEFT];
-const platformType = [ FALLEN ];
+// const platformType = [SPIKES, NORMAL, SPRING, MOVERIGHT, MOVELEFT, FALLEN];
+const platformType = [ NORMAL ];
 
 
 const getDefaultState = ({ boardSize, playerSize}) => {
@@ -37,12 +37,14 @@ const getDefaultState = ({ boardSize, playerSize}) => {
 			]
 		},
 		collisionWith: null,
-		fallingSpeed: 4,
+		fallingSpeed: 5,
 		playerScore: 0, // lv
 		playerLifePoint:20,
-		platformSpeed: 3,
+		platformSpeed: 4,
 		platformIndex: 0,
 		activePlatforms: 4,
+		timeElapsed: 0,
+		isEndGame: false
 	} 
 }
 
@@ -58,14 +60,11 @@ export default class Game extends Component {
 	placePlatfrom = () => {
 		const { board, platform } = this.state.size;
 
-		// const startPosition = randomGen(board.width-platform.width);
-		const startPosition = 150
+		const startPosition = randomGen(board.width-platform.width);
+	
 		const type = platformType[randomGen(platformType.length)]
 		
 		const newPlatform = this.generatePlatform(startPosition, type); 
-		console.log('----------------------')
-		console.log(JSON.stringify(this.state.positions.platforms))
-		console.log('NEW', JSON.stringify(newPlatform))
 
 		this.setState({
 			positions:{
@@ -113,16 +112,14 @@ export default class Game extends Component {
 	handlePlayerCollision = (pfKey, pfTop, pfType) => {
 		const {platformSpeed, size:{player}, playerLifePoint, positions:{playerPosition:top}} = this.state;
 
-		console.log('touch', pfType, pfKey)
+		// console.log('touch', pfType, pfKey)
 		let newPlayerTop = pfTop - player + platformSpeed;
 		let newLifePoint = playerLifePoint; 
 
 		newLifePoint = this.updateLifePoint(pfType, newLifePoint);
 
-		// check if < 1 or gameover /////////////////////////////
-
 		if(pfType === FALLEN){
-			let delay = 800 // 0.8 seconds
+			let delay = 0.7 // 0.8 seconds
 			setTimeout(()=>{
 				this.removePlatform(pfKey);
 			}, delay)
@@ -143,61 +140,93 @@ export default class Game extends Component {
 		})
 	}
 
-	updateLifePoint = (pfType, lifePoint) => {
+	updateLifePoint = (type, lifePoint) => {
 		
-		if(pfType === NORMAL){
+		if(type === NORMAL){
 			lifePoint += 2;
 			if(lifePoint > 20){
 				lifePoint = 20;
 			}
-		}else if(pfType === SPIKES){
+		}else if(type === SPIKES || type === TOP){
 			lifePoint -= 4;
+		}else if(type === BOTTOM){
+			lifePoint = 0;
 		}
-		
+		if(lifePoint <= 0){
+			this.endGame();
+		}
 		return lifePoint;
+	}
+
+	endGame = () =>{
+
+		clearInterval(this.mainInterval);
+		clearInterval(this.gameInterval);
+		clearInterval(this.timeInterval);
+
+		setTimeout(()=>{
+			this.setState({
+				isEndGame: true
+			})
+		}, 50);
+	}
+
+	resetGame = () => {
+		const { boardSize, playerSize } = this.props;
+
+		this.endGame();
+		
+		setTimeout(()=>{
+			this.setState({
+				...getDefaultState({ boardSize, playerSize }),	
+			})
+		}, 50);	
+		this.startGame();
 	}
 
 	handlePlayerMovement = (dirObj) => {
 		const { top, left } = this.state.positions.player;
 		const { player, board: boardSize } = this.state.size;
-		const { collisionWith } = this.state;
+		const { collisionWith, isEndGame } = this.state;
 
-		// check walls
-		switch (dirObj.dir) {
-			case UP:
-				if (top <= 0) return;
-				break;
-			case DOWN:
-				if (top >= boardSize.height - player) return;
-				break;
-			case LEFT:
-				if (left <= 0) return; 
-				break;
-			case RIGHT:
-				if (left >= boardSize.width-player) return;
-				break;
-		}
-
-		this.setState({
-			positions: {
-				...this.state.positions,
-				player:{
-					top: top + dirObj.top,
-					left: left + dirObj.left
-				}
+		if(!isEndGame){
+			// check walls
+			switch (dirObj.dir) {
+				case UP:
+					if (top <= 0) return;
+					break;
+				case DOWN:
+					if (top >= boardSize.height - player) return;
+					break;
+				case LEFT:
+					if (left <= 0) return; 
+					break;
+				case RIGHT:
+					if (left >= boardSize.width-player) return;
+					break;
 			}
-		});
 
-		if(collisionWith !== null && 
-		   !this.checkCollision(collisionWith)){
 			this.setState({
-				collisionWith:null
-			})
+				positions: {
+					...this.state.positions,
+					player:{
+						top: top + dirObj.top,
+						left: left + dirObj.left
+					}
+				}
+			});
+
+			if(collisionWith !== null && 
+			   !this.checkCollision(collisionWith)){
+				this.setState({
+					collisionWith:null
+				})
+			}
 		}
 	}
 
 	startGame = () =>{
-		// this.platformInterval = setInterval(this.updatePlatformPositions, 50);
+		this.timeInterval = setInterval(this.updateGame, 1000);
 		this.mainInterval = setInterval(()=>{
 			this.updatePlatformPositions();
 			this.updatePlayerPositions();
@@ -206,31 +235,60 @@ export default class Game extends Component {
 	}
 
 	updateGame = () => {
+		const { timeElapsed, platformSpeed } = this.state;
 
+
+		this.updateTimeAndScore();
+		if(timeElapsed > 0) {
+
+			// platform speed max <= 10
+			if(platformSpeed < 10 && timeElapsed % 20 === 0) {
+				this.incrementPlatformSpeed();
+			}
+		}
+	}
+
+	updateTimeAndScore = () => {
+
+		const { timeElapsed, playerScore } = this.state;
+
+		this.setState({
+			...this.state,
+			timeElapsed: timeElapsed + 1, 
+			playerScore: (timeElapsed+1)%5 === 0? playerScore+1: playerScore
+		})
 	}
 
 	updatePlayerPositions = () => {
-		const {platformSpeed, fallingSpeed, positions:{player, platforms}, collisionWith} = this.state;
+		const {size:{board}, platformSpeed, fallingSpeed, positions:{player, platforms}, collisionWith, playerLifePoint} = this.state;
 	
 		let newTop, 
 			newLeft,
 			currentPlatform,
-			newCollisionWith;
+			newCollisionWith,
+			newLifePoint;
 
 		newCollisionWith = collisionWith;
 		newLeft = player.left;
+		newLifePoint = playerLifePoint;
 
+		// do stuff when player touch a platform
 		if(collisionWith !== null){
 
 			currentPlatform = platforms.filter(fp => fp.key === collisionWith )[0];
 			newTop = player.top - platformSpeed;
 
 			if(currentPlatform.type === SPRING){
-				newTop -= 100;
+				newTop -= 50;
 			}else if(currentPlatform.type === MOVERIGHT){
-				newLeft += 2;
+				newLeft += 3;
 			}else if(currentPlatform.type === MOVELEFT){
-				newLeft -= 2;
+				newLeft -= 3;
+			}
+			
+			// make sure player stay in top-boundary 
+			if(newTop <= 0){
+				newTop = 0;
 			}
 
 			if(!this.checkCollision(collisionWith)){
@@ -238,6 +296,14 @@ export default class Game extends Component {
 			}
 		}else{
 			newTop = player.top + fallingSpeed;
+		}
+
+
+		// check if player out of bound
+		if(newTop === 0){
+			newLifePoint = this.updateLifePoint(TOP, newLifePoint);
+		}else if(newTop > board.height){
+			newLifePoint = this.updateLifePoint(BOTTOM, newLifePoint);
 		}
 		
 		
@@ -250,7 +316,8 @@ export default class Game extends Component {
 					left: newLeft
 				}
 			},
-			collisionWith: newCollisionWith
+			collisionWith: newCollisionWith,
+			playerLifePoint: newLifePoint
 		})
 	}
 
@@ -274,6 +341,7 @@ export default class Game extends Component {
 	}
 
 	updatePlatformsInPlay = () => {
+
 		const { activePlatforms } = this.state;
 		const { platforms } = this.state.positions;
 		
@@ -281,6 +349,18 @@ export default class Game extends Component {
 			
 			this.placePlatfrom();
 		}
+	}
+
+	incrementPlatformSpeed = () => {
+		const { platformSpeed } = this.state;
+
+		this.setState({
+			...this.state,
+			platformSpeed: platformSpeed + 1
+		}, ()=>{
+			console.log('game updated');
+			console.log(JSON.stringify(this.state));
+		})
 	}
 
 	removePlatform = (pfKey) => {
@@ -303,16 +383,18 @@ export default class Game extends Component {
 			positions: {player:playerPos},
 			collisionWith,
 			playerLifePoint,
+			isEndGame
 		} = this.state;
 
 		return (
 			<div>
 				Main component
 				<br/><br/>
-				<GameStatus lifePoint={playerLifePoint}/>
+				<GameStatus lifePoint={playerLifePoint}
+							resetGame={this.resetGame}/>
 				<br/>
 				<hr/>
-				<Board boardSize={this.props.boardSize} >
+				<Board boardSize={this.props.boardSize} isEnd={isEndGame}>
 					<Player 
 						size={player}
 						position={playerPos}
@@ -342,6 +424,7 @@ export default class Game extends Component {
 	}
 
 	componentWillUnmount(){
+		clearInterval(this.state.timeInterval);
 		clearInterval(this.state.mainInterval);
 		clearInterval(this.state.gameInterval);
 	}

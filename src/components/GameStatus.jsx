@@ -13,6 +13,12 @@ const lifePointStyle = (color='green')=> {
 	}
 }
 
+const controlPanelStyle = () =>{
+	return {
+		float: 'right'
+	}
+}
+
 const createLifeBar = (lifePoint) =>{
 	let holder = [];
 	let color = 'black';
@@ -33,13 +39,16 @@ const createLifeBar = (lifePoint) =>{
 }
 
 
-export default ({lifePoint}) => (
+export default ({lifePoint, resetGame}) => (
 
 	<div>
 		Life Point: {lifePoint}
 
 		<div name='lifePointBar'>
 			{createLifeBar(lifePoint)}
+		</div>
+		<div style={controlPanelStyle()}>
+			<button onClick={resetGame} >Reset</button>
 		</div>
 	</div>
 )

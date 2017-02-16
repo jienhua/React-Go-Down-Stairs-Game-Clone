@@ -9,3 +9,6 @@ export const SPRING = 'SPRING';
 export const MOVERIGHT = 'MOVERIGHT';
 export const MOVELEFT = 'MOVELEFT';
 export const FALLEN = 'FALLEN';
+
+export const TOP = 'TOP';
+export const BOTTOM = 'BOTTOM';
