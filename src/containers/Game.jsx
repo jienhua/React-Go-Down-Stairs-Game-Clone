@@ -41,10 +41,11 @@ const getDefaultState = ({ boardSize, playerSize}) => {
 		playerScore: 0, // lv
 		playerLifePoint:20,
 		platformSpeed: 4,
-		platformIndex: 0,
-		activePlatforms: 4,
+		platformIndex: 1,
+		activePlatforms: 5,
 		timeElapsed: 0,
-		isEndGame: false
+		isEndGame: false,
+		gameIntervalTime: 1000
 	} 
 }
 
@@ -161,7 +162,7 @@ export default class Game extends Component {
 	endGame = () =>{
 
 		clearInterval(this.mainInterval);
-		clearInterval(this.gameInterval);
+		// clearInterval(this.gameInterval);
 		clearInterval(this.timeInterval);
 
 		setTimeout(()=>{
@@ -226,12 +227,22 @@ export default class Game extends Component {
 	}
 
 	startGame = () =>{
+		const { isEndGame, gameIntervalTime } = this.state; 
+
 		this.timeInterval = setInterval(this.updateGame, 1000);
 		this.mainInterval = setInterval(()=>{
 			this.updatePlatformPositions();
 			this.updatePlayerPositions();
 		}, 60);
-		this.gameInterval = setInterval(this.updatePlatformsInPlay, 1000);
+		// this.gameInterval = setInterval(this.updatePlatformsInPlay, 1000);
+		let gameInterval = () => {
+
+			if(isEndGame){return;}
+			// console.log(JSON.stringify(this.state));
+			this.updatePlatformsInPlay();
+			setTimeout(gameInterval, gameIntervalTime);
+		}
+		gameInterval();
 	}
 
 	updateGame = () => {
@@ -241,9 +252,17 @@ export default class Game extends Component {
 		this.updateTimeAndScore();
 		if(timeElapsed > 0) {
 
-			// platform speed max <= 10
-			if(platformSpeed < 10 && timeElapsed % 20 === 0) {
+			if( timeElapsed % 20 === 0) {
 				this.incrementPlatformSpeed();
+				this.incrementGameIntervalTime();
+			}
+
+			// if( timeElapsed % 25 ===0) {
+			// 	this.incrementGameIntervalTime();
+			// }
+			
+			if(timeElapsed % 30 === 0){
+				this.decrementActivePlatforms();
 			}
 		}
 	}
@@ -273,31 +292,32 @@ export default class Game extends Component {
 		newLifePoint = playerLifePoint;
 
 		// do stuff when player touch a platform
-		if(collisionWith !== null){
+		///////////////////////////////////////////////
+		// if(collisionWith !== null){
 
-			currentPlatform = platforms.filter(fp => fp.key === collisionWith )[0];
-			newTop = player.top - platformSpeed;
+		// 	currentPlatform = platforms.filter(fp => fp.key === collisionWith )[0];
+		// 	newTop = player.top - platformSpeed;
 
-			if(currentPlatform.type === SPRING){
-				newTop -= 50;
-			}else if(currentPlatform.type === MOVERIGHT){
-				newLeft += 3;
-			}else if(currentPlatform.type === MOVELEFT){
-				newLeft -= 3;
-			}
+		// 	if(currentPlatform.type === SPRING){
+		// 		newTop -= 50;
+		// 	}else if(currentPlatform.type === MOVERIGHT){
+		// 		newLeft += 3;
+		// 	}else if(currentPlatform.type === MOVELEFT){
+		// 		newLeft -= 3;
+		// 	}
 			
-			// make sure player stay in top-boundary 
-			if(newTop <= 0){
-				newTop = 0;
-			}
+		// 	// make sure player stay in top-boundary 
+		// 	if(newTop <= 0){
+		// 		newTop = 0;
+		// 	}
 
-			if(!this.checkCollision(collisionWith)){
-				newCollisionWith = null;
-			}
-		}else{
-			newTop = player.top + fallingSpeed;
-		}
-
+		// 	if(!this.checkCollision(collisionWith)){
+		// 		newCollisionWith = null;
+		// 	}
+		// }else{
+		// 	newTop = player.top + fallingSpeed;
+		// }
+		/////////////////////////////////////////////////
 
 		// check if player out of bound
 		if(newTop === 0){
@@ -354,12 +374,46 @@ export default class Game extends Component {
 	incrementPlatformSpeed = () => {
 		const { platformSpeed } = this.state;
 
+		if( platformSpeed < 10){
+			this.setState({
+				...this.state,
+				platformSpeed: platformSpeed + 1
+			}, ()=>{
+				console.log('platformSpeed updated');
+				console.log(JSON.stringify(this.state));
+			})
+		}
+	}
+
+	decrementActivePlatforms = () => {
+		const { activePlatforms } = this.state;
+
+		if( activePlatforms >4 ){
+			this.setState({
+				...this.state,
+				activePlatforms: activePlatforms - 1
+			}, ()=>{
+				console.log('activePlatforms update');
+			})
+		}
+	} 
+
+	incrementGameIntervalTime = () => {
+		const { gameIntervalTime } = this.state;
+
+		let newIntervalTime = gameIntervalTime;
+
+		if( gameIntervalTime > 200){
+			newIntervalTime -= 100;
+		}else{
+			newIntervalTime = 90;
+		}
+
 		this.setState({
-			...this.state,
-			platformSpeed: platformSpeed + 1
-		}, ()=>{
-			console.log('game updated');
-			console.log(JSON.stringify(this.state));
+				...this.state,
+				gameIntervalTime: newIntervalTime
+			}, () =>{
+				console.log('game interval itme update');
 		})
 	}
 
@@ -383,7 +437,11 @@ export default class Game extends Component {
 			positions: {player:playerPos},
 			collisionWith,
 			playerLifePoint,
-			isEndGame
+			isEndGame,
+			platformSpeed,
+			activePlatforms,
+			timeElapsed,
+			gameIntervalTime
 		} = this.state;
 
 		return (
@@ -391,7 +449,11 @@ export default class Game extends Component {
 				Main component
 				<br/><br/>
 				<GameStatus lifePoint={playerLifePoint}
-							resetGame={this.resetGame}/>
+							resetGame={this.resetGame}
+							speed={platformSpeed}
+							active={activePlatforms}
+							time={timeElapsed}
+							gameSpeed={gameIntervalTime}/>
 				<br/>
 				<hr/>
 				<Board boardSize={this.props.boardSize} isEnd={isEndGame}>
@@ -426,6 +488,6 @@ export default class Game extends Component {
 	componentWillUnmount(){
 		clearInterval(this.state.timeInterval);
 		clearInterval(this.state.mainInterval);
-		clearInterval(this.state.gameInterval);
+		// clearInterval(this.state.gameInterval);
 	}
 }
