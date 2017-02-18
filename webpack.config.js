@@ -1,29 +1,52 @@
+const path = require('path');
+const webpack = require('webpack')
+
 module.exports = {
 	entry: './src/index.jsx',
 
 	output: {
-		path: __dirname+'/public',
+		path: path.resolve(__dirname+'/public'),
 		filename: 'bundle.js',
-		publicPath: '/'
+		// publicPath: '/'
 	},
 
 	module:{
-		loaders: [
+		// loaders: [
+		// 	{
+		// 		test: /.(js|jsx)$/,
+		// 		exclude: /node_modules/,
+		// 		loader: 'babel',
+		// 		query: {
+		// 			presets: ['react', 'es2015', 'stage-1']
+		// 		}
+		// 	}
+		// ]
+		rules:[
 			{
-				test: /.(js|jsx)$/,
+				test: /\.(js|jsx)$/,
 				exclude: /node_modules/,
-				loader: 'babel',
+				loader: 'babel-loader',
 				query: {
 					presets: ['react', 'es2015', 'stage-1']
 				}
 			}
 		]
 	},
-	devtool: 'eval',
+	// devtool: 'eval',
 	resolve: {
-		extensions: ['', '.js', '.jsx'],
-		modulesDirectories: ['src', 'node_modules']
+		alias:{
+			components$: path.resolve(__dirname, 'src/components/index.js')
+		},
+		// mainFiles: ['index'],
+		extensions: [
+		// '*',
+		'.js', 
+		'.jsx']
 	},
+
+	plugins:[
+		// new webpack.optimize.UglifyJsPlugin()
+	],
 
 	devServer: {
 		'contentBase': './public',

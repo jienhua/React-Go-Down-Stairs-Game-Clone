@@ -404,9 +404,9 @@ export default class Game extends Component {
 		let newIntervalTime = gameIntervalTime;
 
 		if( gameIntervalTime > 200){
-			newIntervalTime -= 100;
+			newIntervalTime -= 200;
 		}else{
-			newIntervalTime = 90;
+			newIntervalTime = 40;
 		}
 
 		this.setState({
