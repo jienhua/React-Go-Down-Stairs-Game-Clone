@@ -39,9 +39,11 @@ const createLifeBar = (lifePoint) =>{
 }
 
 
-export default ({lifePoint, resetGame, speed, active, time,gameSpeed}) => (
+export default ({lifePoint, resetGame, speed, active, time,gameSpeed, floor}) => (
 
 	<div>
+		Floor B {floor}
+		<br/>
 		Time: {time}
 		<br/>
 		Speed: {speed}

@@ -274,7 +274,7 @@ export default class Game extends Component {
 		this.setState({
 			...this.state,
 			timeElapsed: timeElapsed + 1, 
-			playerScore: (timeElapsed+1)%5 === 0? playerScore+1: playerScore
+			playerScore: playerScore+ 1
 		})
 	}
 
@@ -441,7 +441,8 @@ export default class Game extends Component {
 			platformSpeed,
 			activePlatforms,
 			timeElapsed,
-			gameIntervalTime
+			gameIntervalTime,
+			playerScore
 		} = this.state;
 
 		return (
@@ -453,7 +454,8 @@ export default class Game extends Component {
 							speed={platformSpeed}
 							active={activePlatforms}
 							time={timeElapsed}
-							gameSpeed={gameIntervalTime}/>
+							gameSpeed={gameIntervalTime}
+							floor={playerScore}/>
 				<br/>
 				<hr/>
 				<Board boardSize={this.props.boardSize} isEnd={isEndGame}>
