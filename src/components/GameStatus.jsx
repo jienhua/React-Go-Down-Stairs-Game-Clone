@@ -1,4 +1,5 @@
 import React from 'react';
+import {Leaderboard} from 'components';
 
 const lifePointStyle = (color='green')=> {
 
@@ -39,7 +40,7 @@ const createLifeBar = (lifePoint) =>{
 }
 
 
-export default ({lifePoint, resetGame, speed, active, time,gameSpeed, floor}) => (
+export default ({lifePoint, resetGame, speed, active, time,gameSpeed, floor, top10}) => (
 
 	<div>
 		Floor B {floor}
@@ -51,6 +52,7 @@ export default ({lifePoint, resetGame, speed, active, time,gameSpeed, floor}) =>
 		Active: {active}
 		<br/>
 		gameSpeed: {gameSpeed}
+		<Leaderboard top10={top10} />
 		<hr/>
 		Life Point: {lifePoint}
 

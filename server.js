@@ -21,11 +21,33 @@ app.get('/scoreBoard', (req, res) => {
 })
 
 app.post('/scoreBoard', (req, res)=> {
-	fs.writeFile('./scoreBoard.json', JSON.stringify(req.body), (err)=>{
+	
+	fs.readFile('./scoreBoard.json', 'utf8', (err, data)=>{
 		if(err){
-			return res.send('writing error');
+			return res.send('error');
 		}
-		res.send(req.body);
+		
+		data = JSON.parse(data).top10
+		
+		data.push({
+			"name": req.body.name,
+			"score": req.body.score
+		})
+		
+		data.sort((a,b) => {
+			return b.score-a.score;
+		})
+
+		if(data.length > 10){
+			data = data.slice(0,10);
+		}
+
+		fs.writeFile('./scoreBoard.json', JSON.stringify({"top10":data}), (err)=>{
+			if(err){
+				return res.send('writing error');
+			}
+			res.send({"top10":data});
+		})
 	})
 })
 

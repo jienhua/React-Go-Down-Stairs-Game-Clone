@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
+import axios from 'axios';
 import { Board, Player, Platform, GameStatus } from '../components';
 import { UP, DOWN, LEFT, RIGHT } from '../helpers/constants';
 import { randomGen } from '../helpers/utils';
 import { SPIKES, NORMAL, SPRING, MOVERIGHT, MOVELEFT, FALLEN, TOP, BOTTOM } from '../helpers/constants'; 
+
 
 // const platformType = [SPIKES, NORMAL, SPRING, MOVERIGHT, MOVELEFT, FALLEN];
 const platformType = [ NORMAL ];
@@ -46,6 +48,7 @@ const getDefaultState = ({ boardSize, playerSize}) => {
 		timeElapsed: 0,
 		isEndGame: false,
 		gameIntervalTime: 1000
+
 	} 
 }
 
@@ -161,6 +164,13 @@ export default class Game extends Component {
 
 	endGame = () =>{
 
+		const { top10Scores, playerScore } = this.state;
+
+		if(top10Scores.length < 10 ||
+		   top10Scores[top10Scores.length-1].score < playerScore){
+			this.updateTop10Scores(playerScore);
+		}
+
 		clearInterval(this.mainInterval);
 		// clearInterval(this.gameInterval);
 		clearInterval(this.timeInterval);
@@ -176,12 +186,14 @@ export default class Game extends Component {
 		const { boardSize, playerSize } = this.props;
 
 		this.endGame();
-		
+
 		setTimeout(()=>{
 			this.setState({
 				...getDefaultState({ boardSize, playerSize }),	
 			})
-		}, 50);	
+		}, 50);
+
+		this.fetchTop10Scores();	
 		this.startGame();
 	}
 
@@ -293,30 +305,30 @@ export default class Game extends Component {
 
 		// do stuff when player touch a platform
 		///////////////////////////////////////////////
-		// if(collisionWith !== null){
+		if(collisionWith !== null){
 
-		// 	currentPlatform = platforms.filter(fp => fp.key === collisionWith )[0];
-		// 	newTop = player.top - platformSpeed;
+			currentPlatform = platforms.filter(fp => fp.key === collisionWith )[0];
+			newTop = player.top - platformSpeed;
 
-		// 	if(currentPlatform.type === SPRING){
-		// 		newTop -= 50;
-		// 	}else if(currentPlatform.type === MOVERIGHT){
-		// 		newLeft += 3;
-		// 	}else if(currentPlatform.type === MOVELEFT){
-		// 		newLeft -= 3;
-		// 	}
+			if(currentPlatform.type === SPRING){
+				newTop -= 50;
+			}else if(currentPlatform.type === MOVERIGHT){
+				newLeft += 3;
+			}else if(currentPlatform.type === MOVELEFT){
+				newLeft -= 3;
+			}
 			
-		// 	// make sure player stay in top-boundary 
-		// 	if(newTop <= 0){
-		// 		newTop = 0;
-		// 	}
+			// make sure player stay in top-boundary 
+			if(newTop <= 0){
+				newTop = 0;
+			}
 
-		// 	if(!this.checkCollision(collisionWith)){
-		// 		newCollisionWith = null;
-		// 	}
-		// }else{
-		// 	newTop = player.top + fallingSpeed;
-		// }
+			if(!this.checkCollision(collisionWith)){
+				newCollisionWith = null;
+			}
+		}else{
+			newTop = player.top + fallingSpeed;
+		}
 		/////////////////////////////////////////////////
 
 		// check if player out of bound
@@ -431,6 +443,32 @@ export default class Game extends Component {
 		})
 	}
 
+	fetchTop10Scores = () => {
+		axios.get('/scoreBoard')
+			.then(data => {
+				this.setState({
+					top10Scores: data.data.top10
+				},()=>{
+					console.log('finish fetch top 10', JSON.stringify(this.state.top10Scores))
+				})
+			})
+			.catch(err=> console.log(err))
+	}
+
+	updateTop10Scores = (score) => {
+	
+		console.log('update playerscore ', score);
+		axios.post('/scoreBoard', {
+			score: score
+		})
+		.then( res => {
+			console.log(res);
+		})
+		.catch( err => {
+			console.log(err);
+		})
+	}
+
 	render(){	
 		const {
 			size: {board, player},
@@ -442,7 +480,8 @@ export default class Game extends Component {
 			activePlatforms,
 			timeElapsed,
 			gameIntervalTime,
-			playerScore
+			playerScore,
+			top10Scores
 		} = this.state;
 
 		return (
@@ -455,7 +494,8 @@ export default class Game extends Component {
 							active={activePlatforms}
 							time={timeElapsed}
 							gameSpeed={gameIntervalTime}
-							floor={playerScore}/>
+							floor={playerScore}
+							top10={top10Scores}/>
 				<br/>
 				<hr/>
 				<Board boardSize={this.props.boardSize} isEnd={isEndGame}>
@@ -485,6 +525,7 @@ export default class Game extends Component {
 
 	componentDidMount(){
 		this.startGame();
+		this.fetchTop10Scores();
 	}
 
 	componentWillUnmount(){
