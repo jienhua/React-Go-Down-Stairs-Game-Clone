@@ -33,7 +33,6 @@ const createLifeBar = (lifePoint) =>{
 	}
 
 	for(let i = 0;i<lifePoint; i++){
-		// console.log('yoyoyoyo')
 		holder.push(<div key={i} style={lifePointStyle(color)}></div>)
 	}
 	return holder;
@@ -43,15 +42,8 @@ const createLifeBar = (lifePoint) =>{
 export default ({lifePoint, resetGame, startGame, speed, active, time,gameSpeed, floor, top10}) => (
 
 	<div>
-		Floor B {floor}
+		Floor-B {floor}
 		<br/>
-		Time: {time}
-		<br/>
-		Speed: {speed}
-		<br/>
-		Active: {active}
-		<br/>
-		gameSpeed: {gameSpeed}
 		<Leaderboard top10={top10} />
 		<hr/>
 		Life Point: {lifePoint}

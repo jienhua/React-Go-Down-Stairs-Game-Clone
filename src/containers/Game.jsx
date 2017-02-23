@@ -6,8 +6,8 @@ import { randomGen } from '../helpers/utils';
 import { SPIKES, NORMAL, SPRING, MOVERIGHT, MOVELEFT, FALLEN, TOP, BOTTOM } from '../helpers/constants'; 
 
 
-// const platformType = [SPIKES, NORMAL, SPRING, MOVERIGHT, MOVELEFT, FALLEN];
-const platformType = [ NORMAL ];
+const platformType = [SPIKES, NORMAL, SPRING, MOVERIGHT, MOVELEFT, FALLEN];
+// const platformType = [ NORMAL ];
 
 
 const getDefaultState = ({ boardSize, playerSize}) => {
@@ -129,7 +129,7 @@ export default class Game extends Component {
 		}
 
 		this.setState({
-			// ...this.state,
+			...this.state,
 			positions:{
 				...this.state.positions,
 				player:{
@@ -144,7 +144,11 @@ export default class Game extends Component {
 
 	updateLifePoint = (type, lifePoint) => {
 		
-		if(type === NORMAL){
+		if(type === NORMAL ||
+		   type === FALLEN ||
+		   type === SPRING ||
+		   type === MOVERIGHT ||
+		   type === MOVELEFT){
 			lifePoint += 2;
 			if(lifePoint > 20){
 				lifePoint = 20;
@@ -163,17 +167,17 @@ export default class Game extends Component {
 	endGame = () =>{
 		const {isEndGame, top10Scores, playerScore } = this.state;
 
-		// if(!isEndGame && (top10Scores.length < 10 ||
-		// 	top10Scores[top10Scores.length-1].score < playerScore)){
-		// 	var name = prompt("Enter your name", "Anonymous");
-		// 	if(name === null || name === ''){
-		// 		name = 'Anonymous';
-		// 	}
-		// 	this.updateTop10Scores({
-		// 		name: name,
-		// 		score: playerScore
-		// 	});
-		// }
+		if(!isEndGame && (top10Scores.length < 10 ||
+			top10Scores[top10Scores.length-1].score < playerScore)){
+			var name = prompt("Enter your name", "Anonymous");
+			if(name === null || name === ''){
+				name = 'Anonymous';
+			}
+			this.updateTop10Scores({
+				name: name,
+				score: playerScore
+			});
+		}
 
 		clearInterval(this.mainInterval);
 		clearInterval(this.timeInterval);
@@ -284,7 +288,7 @@ export default class Game extends Component {
 		const { timeElapsed, playerScore } = this.state;
 
 		this.setState({
-			// ...this.state,
+			...this.state,
 			timeElapsed: timeElapsed + 1, 
 			playerScore: playerScore+ 1
 		})
@@ -319,7 +323,7 @@ export default class Game extends Component {
 				newLeft -= 3;
 			}
 			
-			// make sure player stay in top-boundary 
+			// make sure player stay inside top-boundary 
 			if(newTop <= 0){
 				newTop = 0;
 			}
@@ -341,7 +345,7 @@ export default class Game extends Component {
 		
 		
 		this.setState({
-			// ...this.state,
+			...this.state,
 			positions:{
 				...this.state.positions,
 				player:{
@@ -351,7 +355,7 @@ export default class Game extends Component {
 			},
 			collisionWith: newCollisionWith,
 			playerLifePoint: newLifePoint
-		})
+		});
 	}
 
 	updatePlatformPositions = () => {
@@ -367,20 +371,17 @@ export default class Game extends Component {
 					}
 
 					pf.top -= platformSpeed;
-					return pf
+					return pf;
 				})
 			}
 		})
 	}
 
 	updatePlatformsInPlay = () => {
-		// console.log(JSON.stringify(this.state))
 		const { activePlatforms } = this.state;
 		const { platforms } = this.state.positions;
 		
 		if (platforms.length < activePlatforms) {
-			
-			console.log( platforms.length, activePlatforms)
 			this.placePlatfrom();
 		}
 	}
@@ -390,11 +391,9 @@ export default class Game extends Component {
 
 		if( platformSpeed < 10){
 			this.setState({
-				// ...this.state,
+				...this.state,
 				platformSpeed: platformSpeed + 1
-			}, ()=>{
-				console.log(JSON.stringify(this.state));
-			})
+			});
 		}
 	}
 
@@ -403,9 +402,9 @@ export default class Game extends Component {
 
 		if( activePlatforms >4 ){
 			this.setState({
-				// ...this.state,
+				...this.state,
 				activePlatforms: activePlatforms - 1
-			})
+			});
 		}
 	} 
 
@@ -421,9 +420,9 @@ export default class Game extends Component {
 		}
 
 		this.setState({
-				// ...this.state,
-				gameIntervalTime: newIntervalTime
-		})
+			...this.state,
+			gameIntervalTime: newIntervalTime
+		});
 	}
 
 	removePlatform = (pfKey) => {
@@ -431,13 +430,13 @@ export default class Game extends Component {
 		const { positions:{platforms}} = this.state;
 
 		this.setState({
-				// ...this.state,
-				positions:{
-					...this.state.positions,
-					platforms: platforms.filter(pf => pf.key !== pfKey)
-				},
-				collisionWith: null
-		})
+			...this.state,
+			positions:{
+				...this.state.positions,
+				platforms: platforms.filter(pf => pf.key !== pfKey)
+			},
+			collisionWith: null
+		});
 	}
 
 	fetchTop10Scores = () => {
@@ -449,7 +448,7 @@ export default class Game extends Component {
 					console.log('finish fetch top 10', JSON.stringify(this.state.top10Scores))
 				})
 			})
-			.catch(err=> console.log(err))
+			.catch(err=> console.log(err));
 	}
 
 	updateTop10Scores = (data) => {
@@ -464,7 +463,7 @@ export default class Game extends Component {
 		})
 		.catch( err => {
 			console.log(err);
-		})
+		});
 	}
 
 	render(){	
@@ -484,7 +483,7 @@ export default class Game extends Component {
 
 		return (
 			<div>
-				Main component
+				Go Down Stairs
 				<br/><br/>
 				<GameStatus lifePoint={playerLifePoint}
 							resetGame={this.resetGame}

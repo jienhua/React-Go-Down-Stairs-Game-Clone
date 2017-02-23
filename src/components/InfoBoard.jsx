@@ -1,10 +1,9 @@
-import React, { Component } from 'react';
+import React, { Component, PropTypes } from 'react';
 
 const style = (width) =>{
 
 	return {
 		width: '150px',
-		// border:'1px solid black',
 		position: 'relative',
 		marginLeft: width+'px',
 		paddingLeft: '30px'
@@ -39,6 +38,10 @@ class InfoBoard extends Component{
 			</div>
 		)
 	}
+}
+
+InfoBoard.propTypes = {
+	width: PropTypes.number.isRequired
 }
 
 export default InfoBoard;

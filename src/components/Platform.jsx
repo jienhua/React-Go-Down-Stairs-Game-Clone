@@ -5,7 +5,7 @@ import { Stair } from 'components';
 class Platform extends Component {
 
 	componentDidUpdate() {
-		const {info: {key, top, left, type}, collisionWith, checkCollision, onCollide} = this.props;
+		const {info: {key, top, type}, collisionWith, checkCollision, onCollide} = this.props;
 		
 		if(key !== collisionWith &&
 			checkCollision(key)){
@@ -27,9 +27,17 @@ class Platform extends Component {
 	}
 }
 
-// Platform.propTypes = {
-// 	size: PropTypes.number.isRequire,
-
-// }
+Platform.propTypes = {
+	info: PropTypes.shape({
+		top: PropTypes.number.isRequire,
+		left: PropTypes.number.isRequire,
+		type: PropTypes.string.isRequire,
+		key: PropTypes.number.isRequire
+	}),
+	// size: PropTypes.number.isRequire,
+	collisionWith: PropTypes.number,
+	// checkCollision: PropTypes.func.isRequire,
+	// onCollide: PropTypes.func.isRequire
+}
 
 export default Platform;

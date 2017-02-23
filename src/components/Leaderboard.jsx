@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, PropTypes } from 'react';
 
 const leaderboardLeftStyle = () =>{
 	return {
@@ -37,7 +37,7 @@ class Leaderboard extends Component {
 						<div style={leaderboardRightStyle()}>
 							{scores.slice(0,10).map((i, index)=>{
 								if(index < 5){return;}
-								return <div style={listItemStyle()} key={index}><span >{index + 1}. {i.name}::{i.score}pts</span></div>
+								return <div style={listItemStyle()} key={index}><span>{index + 1}. {i.name}::{i.score}pts</span></div>
 							})}
 						</div>
 					</div>
@@ -47,6 +47,10 @@ class Leaderboard extends Component {
 			</div>
 		)
 	}
+}
+
+Leaderboard.propTypes = {
+	scores: PropTypes.array
 }
 
 export default Leaderboard;

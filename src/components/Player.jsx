@@ -46,6 +46,14 @@ class Player extends Component {
 	}
 }
 
+Player.propTypes = {
+	handlePlayerMovement: PropTypes.func.isRequired,
+	size: PropTypes.number.isRequired,
+	position: PropTypes.shape({
+		top: PropTypes.number.isRequired,
+		left: PropTypes.number.isRequired
+	})
+}
 
 
 export default Player;
