@@ -10484,16 +10484,23 @@ var _initialiseProps = function _initialiseProps() {
 
 	this.endGame = function () {
 		var _state4 = _this3.state,
+		    isEndGame = _state4.isEndGame,
 		    top10Scores = _state4.top10Scores,
 		    playerScore = _state4.playerScore;
 
 
-		if (top10Scores.length < 10 || top10Scores[top10Scores.length - 1].score < playerScore) {
-			_this3.updateTop10Scores(playerScore);
+		if (!isEndGame && (top10Scores.length < 10 || top10Scores[top10Scores.length - 1].score < playerScore)) {
+			var name = prompt("Enter your name", "Anonymous");
+			if (name === null || name === '') {
+				name = 'Anonymous';
+			}
+			_this3.updateTop10Scores({
+				name: name,
+				score: playerScore
+			});
 		}
 
 		clearInterval(_this3.mainInterval);
-		// clearInterval(this.gameInterval);
 		clearInterval(_this3.timeInterval);
 
 		setTimeout(function () {
@@ -10512,11 +10519,16 @@ var _initialiseProps = function _initialiseProps() {
 		_this3.endGame();
 
 		setTimeout(function () {
-			_this3.setState(_extends({}, getDefaultState({ boardSize: boardSize, playerSize: playerSize })));
+			_this3.setState(_extends({}, getDefaultState({ boardSize: boardSize, playerSize: playerSize })), function () {
+				console.log(JSON.stringify(_this3.state));
+			});
 		}, 50);
 
 		_this3.fetchTop10Scores();
-		_this3.startGame();
+		setTimeout(function () {
+			_this3.startGame();
+		}, 50);
+		// this.startGame();
 	};
 
 	this.handlePlayerMovement = function (dirObj) {
@@ -10576,13 +10588,12 @@ var _initialiseProps = function _initialiseProps() {
 			_this3.updatePlatformPositions();
 			_this3.updatePlayerPositions();
 		}, 60);
-		// this.gameInterval = setInterval(this.updatePlatformsInPlay, 1000);
+
 		var gameInterval = function gameInterval() {
 
 			if (isEndGame) {
 				return;
 			}
-			// console.log(JSON.stringify(this.state));
 			_this3.updatePlatformsInPlay();
 			setTimeout(gameInterval, gameIntervalTime);
 		};
@@ -10806,11 +10817,12 @@ var _initialiseProps = function _initialiseProps() {
 		});
 	};
 
-	this.updateTop10Scores = function (score) {
+	this.updateTop10Scores = function (data) {
 
-		console.log('update playerscore ', score);
+		console.log('update playerscore ', data.score);
 		_axios2.default.post('/scoreBoard', {
-			score: score
+			name: data.name,
+			score: data.score
 		}).then(function (res) {
 			console.log(res);
 		}).catch(function (err) {
@@ -12070,7 +12082,10 @@ var Leaderboard = function (_Component) {
 									null,
 									index + 1,
 									'. ',
-									i.score
+									i.name,
+									'::',
+									i.score,
+									'pts'
 								)
 							);
 						})
@@ -12090,7 +12105,10 @@ var Leaderboard = function (_Component) {
 									null,
 									index + 1,
 									'. ',
-									i.score
+									i.name,
+									'::',
+									i.score,
+									'pts'
 								)
 							);
 						})

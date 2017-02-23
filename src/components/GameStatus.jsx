@@ -40,7 +40,7 @@ const createLifeBar = (lifePoint) =>{
 }
 
 
-export default ({lifePoint, resetGame, speed, active, time,gameSpeed, floor, top10}) => (
+export default ({lifePoint, resetGame, startGame, speed, active, time,gameSpeed, floor, top10}) => (
 
 	<div>
 		Floor B {floor}
@@ -60,7 +60,8 @@ export default ({lifePoint, resetGame, speed, active, time,gameSpeed, floor, top
 			{createLifeBar(lifePoint)}
 		</div>
 		<div style={controlPanelStyle()}>
-			<button onClick={resetGame} >Reset</button>
+			<button onClick={startGame}>Start</button> 
+			<button onClick={resetGame}>Reset</button>
 		</div>
 	</div>
 )
